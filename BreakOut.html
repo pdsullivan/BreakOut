@@ -1,0 +1,164 @@
+<html>
+<head>
+<title>breakout</title>
+		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="http://jquery-timer.googlecode.com/files/jquery.timer.js"></script>
+		
+		<style>
+			#ball{
+				width:25px; height:25px; background:#222222; position:relative; left:300px; top:300px;
+			}
+			
+			#frame{
+				margin-left:auto;
+				margin-right:auto;
+				width:800px;
+				height:600px;
+			}
+			
+			#splash_screen{
+				background:#22ff22;
+				width:100%;
+				height:100%;
+				color:#222222;
+				text-align:center;			
+			}
+			
+			#container{
+				width:100%;
+				height:100%;
+				margin-left:auto;
+				margin-right:auto;
+				border:solid 4px #cccccc;
+				clear:both;
+			}
+			
+			#score{
+				margin:25px;
+				color:#ff0000;
+				font-family:verdana,arial,tahoma;
+				font-size:24px;
+				float:left;
+			}
+			
+			#clock{
+				margin:25px;
+				color:#222222;
+				font-family:verdana,arial,tahoma;
+				font-size:24px;
+				float:right;
+			}			
+
+			#restart{
+				color:#222222;
+				font-family:verdana,arial,tahoma;
+				font-size:24px;
+				display-style:block;
+				margin-left:auto;
+				margin-right:auto;
+				clear:both;
+				width:25%;
+			}				
+			
+		</style>
+		
+		<script>
+			//settings
+			var ball_speed = 1000;
+			var score = 0;
+		
+			//initialize program
+			$(document).ready(function($){
+				var ball = $("#ball");
+				initialize();
+				animate_ball();			
+			});
+						
+			function animate_ball()
+			{
+				var direct = {left:'0'};
+				var compass = rand(1,6);
+				if(compass==1){direct={left:'0'};}
+				if(compass==2){direct={left:'100%'};}
+				if(compass==3){direct={top:'0'};}
+				if(compass==4){direct={top:'100%'};}
+				if(compass==5){direct={top:'0%',left:'0'};}
+				if(compass==6){direct={top:'100%',left:'100%'};}
+
+				$(ball).animate(direct, ball_speed, function(){animate_ball()});				
+			}
+			
+			function rand(min, max) {
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			}			
+			
+			function initialize()
+			{
+			
+				$("#splash_screen").hide();
+				$("#splash_screen").fadeIn("slow")
+				$("#container").hide();
+				$("#splash_screen").click(function(e){
+					$(this).hide();
+					$("#container").show();
+					timer.set({ time : 1000, autostart : true });	
+				});
+				
+				$("#restart").click(function(e){
+					location.reload();
+				});
+			
+				//SCOREKEEPER
+				$(ball).click(function(e){
+					score++;
+					$("#score").html("Score: "+score);
+				});
+
+				//GAME-TIMER
+				var count = 60;
+				var timer = $.timer(function() {
+					score = score + 99;
+					$('#clock').html("Clock: "+--count);
+					if(count<1){
+						alert("Game Over, your score was "+score);
+						timer.pause();
+						$(ball).clearQueue();
+						$(ball).stop();
+					}
+				});
+			
+			}
+			
+		</script>
+</head>
+
+<body>
+
+<div id="frame">
+
+	<div id="splash_screen">
+		<p style="padding-top:200px;">
+			<h1>THE GAME</H1>
+			<h2>click to begin</h2>
+			<h3>see how many times you can click on the black square</h3>
+		</p>
+	</div>
+
+	<div id="container">
+
+		<div id="ball">
+		
+		</div>
+	
+	</div>
+	
+	<div id="score">Score: 0</div>
+	<div id="clock">Clock: 60</div>
+	<div style="clear:both;"></div>
+	<div id="restart">Restart Game</div>
+
+</div>
+
+</body>
+
+</html>
