@@ -127,7 +127,6 @@
 				//GAME-TIMER
 				var count = 60;
 				var timer = $.timer(function() {
-					score = score + 99;
 					$('#clock').html("Clock: "+--count);
 					if(count<1){
 						alert("Game Over, your score was "+score);
