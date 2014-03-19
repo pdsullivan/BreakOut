@@ -1,22 +1,12 @@
-<html>
+<html ng-app="app">
 <head>
 <title>breakout</title>
 		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 		<script src="http://jquery-timer.googlecode.com/files/jquery.timer.js"></script>
 		
-		<!-- Latest compiled and minified CSS -->
-                <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<!-- Latest compiled and minified JavaScript -->
-		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-		
 		<style>
 			#ball{
-				width:25px; 
-				height:25px; 
-				background-image: url("images/bug.png");
-				position:relative; 
-				left:300px; 
-				top:300px;
+				width:25px; height:25px; background-image: url(https://www.iconfinder.com/icons/111135/download/png/24); position:relative; left:300px; top:300px;
 			}
 			
 			#frame{
@@ -51,7 +41,7 @@
 				float:left;
 			}
 			
-			#clock{
+			#time{
 				margin:25px;
 				color:#222222;
 				font-family:verdana,arial,tahoma;
@@ -71,102 +61,106 @@
 			}				
 			
 		</style>
-		
-		<script>
-			//settings
-			var ball_speed = 1000;
-			var score = 0;
-		
-			//initialize program
-			$(document).ready(function($){
-				var ball = $("#ball");
-				initialize();
-				animate_ball();			
-			});
-						
-			function animate_ball()
-			{
-				var direct = {left:'0'};
-				var compass = rand(1,6);
-				if(compass==1){direct={left:'0'};}
-				if(compass==2){direct={left:'100%'};}
-				if(compass==3){direct={top:'0'};}
-				if(compass==4){direct={top:'100%'};}
-				if(compass==5){direct={top:'0%',left:'0'};}
-				if(compass==6){direct={top:'100%',left:'100%'};}
+		<!-- JS -->
+        <script src="http://code.angularjs.org/1.2.6/angular.js"></script>
+    <script>
+        // create angular app
+        var app = angular.module('app', []);
 
-				$(ball).animate(direct, ball_speed, function(){animate_ball()});				
-			}
-			
-			function rand(min, max) {
-				return Math.floor(Math.random() * (max - min + 1)) + min;
-			}			
-			
-			function initialize()
-			{
-			
-				$("#splash_screen").hide();
-				$("#splash_screen").fadeIn("slow")
-				$("#container").hide();
-				$("#splash_screen").click(function(e){
-					$(this).hide();
-					$("#container").show();
-					timer.set({ time : 1000, autostart : true });	
-				});
-				
-				$("#restart").click(function(e){
-					location.reload();
-				});
-			
-				//SCOREKEEPER
-				$(ball).click(function(e){
-					score++;
-					$("#score").html("Score: "+score);
-				});
+        // create angular controller
+        app.controller('mainController', function ($scope) {
 
-				//GAME-TIMER
-				var count = 60;
-				var timer = $.timer(function() {
-					$('#clock').html("Clock: "+--count);
-					if(count<1){
-						alert("Game Over, your score was "+score);
-						timer.pause();
-						$(ball).clearQueue();
-						$(ball).stop();
-					}
-				});
-			
-			}
-			
-		</script>
+            $scope.game = {
+                score: 0,
+                level: 1,
+                time: 10,
+                ballspeed: 1000,
+                ball: $('#ball')
+            };
+
+            $scope.splashscreen = $("#splash_screen");
+            $scope.splashscreen.hide();
+            $scope.splashscreen.fadeIn("slow")
+            $("#container").hide();
+
+            animate_ball();
+
+            function animate_ball() {
+                var direct = { left: '0' };
+                var compass = rand(1, 6);
+                if (compass == 1) { direct = { left: '0' }; }
+                if (compass == 2) { direct = { left: '100%' }; }
+                if (compass == 3) { direct = { top: '0' }; }
+                if (compass == 4) { direct = { top: '100%' }; }
+                if (compass == 5) { direct = { top: '0%', left: '0' }; }
+                if (compass == 6) { direct = { top: '100%', left: '100%' }; }
+
+                $scope.game.ball.animate(direct, $scope.game.ballspeed, function () { animate_ball() });
+            }
+
+
+            function rand(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            $scope.timer = $.timer(function () {
+                --$scope.game.time;
+                $scope.$digest();
+                if ($scope.game.time < 1) {
+                    alert("Game Over, your score was " + $scope.game.score);
+                    $scope.timer.pause();
+                    $scope.game.ball.clearQueue();
+                    $scope.game.ball.stop();
+                    $scope.reloadThis();
+                }
+            });
+
+            $scope.gameClick = (function () {
+                $scope.game.score++;
+            });
+
+            $scope.reloadThis = (function (e) {
+                location.reload();
+            });
+
+            $scope.spashClick = (function (e) {
+                $scope.splashscreen.hide();
+                $("#container").show();
+                $scope.timer.set({ time: 1000, autostart: true });
+            });
+
+        });
+    </script>
+		
 </head>
 
-<body>
+<body data-ng-controller="mainController">
 
-<div id="frame">
+    <div id="frame">
 
-	<div id="splash_screen">
-		<p style="padding-top:200px;">
-			<h1>THE GAME</H1>
-			<h2>click to begin</h2>
-			<h3>see how many times you can click on the black square</h3>
-		</p>
-	</div>
+	    <div id="splash_screen" ng-click="spashClick()">
+		    <p style="padding-top:200px;">
+			    <!--<h1>THE GAME</H1>-->
+			    <h2>click to begin</h2>
+			    <h3>see how many times you can click on the black square</h3>
+		    </p>
+	    </div>
 
-	<div id="container">
+	    <div id="container">
 
-		<div id="ball">
+		    <div ng-model="game.ball" ng-click="gameClick()" id="ball">
 		
-		</div>
+		    </div>
 	
-	</div>
+	    </div>
 	
-	<div id="score">Score: 0</div>
-	<div id="clock">Clock: 60</div>
-	<div style="clear:both;"></div>
-	<div id="restart">Restart Game</div>
+	    <div id="">Level: {{game.level}}</div>
+	    <div id="score">Score: {{game.score}}</div>
+	    <div id="time">Clock: {{game.time}}</div>
+	    <div style="clear:both;"></div>
+	    <div ng-click="reloadThis()" id="restart">Restart Game</div>
 
-</div>
+    </div>
 
 </body>
 
